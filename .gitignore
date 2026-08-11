@@ -1,0 +1,10 @@
+# Local Ontos run state (contains created resource IDs)
+scripts/.ontos_state.env
+
+# Databricks bundle build artifacts
+.databricks/
+
+.vscode/
+venv/
+.env
+.DS_Store

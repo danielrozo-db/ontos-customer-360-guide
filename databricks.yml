@@ -1,0 +1,53 @@
+# =============================================================================
+# Bricks&Co Customer 360 — Databricks Asset Bundle
+# =============================================================================
+# Materializes the physical dataset promised by the Ontos "Customer 360 Profile"
+# data product's output port: ${catalog}.${schema}.${table}. A serverless job
+# runs a PySpark + Faker generator that writes the gold Delta table (columns
+# match the ODCS v3.1.0 contract) and applies Unity Catalog tags mirroring the
+# Ontos governance tags.
+#
+#   databricks bundle validate -t dev
+#   databricks bundle deploy   -t dev
+#   databricks bundle run customer_360_synthetic_dataset -t dev
+# =============================================================================
+bundle:
+  name: bricksco_customer_360
+
+include:
+  - resources/*.yml
+
+variables:
+  catalog:
+    description: "Unity Catalog catalog for the Customer 360 dataset (matches the Ontos output port)."
+    default: "bricks_co"
+  schema:
+    description: "Schema within the catalog."
+    default: "customer_360"
+  table:
+    description: "Gold profile table name."
+    default: "customer_360_profile"
+  num_rows:
+    description: "Number of synthetic customers to generate."
+    default: "5000"
+  notification_email:
+    description: "Email for job run notifications."
+    default: "you@example.com"
+
+targets:
+  dev:
+    default: true
+    mode: development
+    workspace:
+      profile: ontos   # host comes from this CLI profile (databricks auth login -p ontos)
+    variables:
+      catalog: "bricks_co"
+      schema: "customer_360"
+
+  prod:
+    mode: production
+    workspace:
+      profile: ontos   # host comes from this CLI profile (databricks auth login -p ontos)
+    variables:
+      catalog: "bricks_co"
+      schema: "customer_360"

@@ -1,0 +1,44 @@
+# =============================================================================
+# Serverless job that generates the Customer 360 Profile gold dataset.
+# =============================================================================
+# Notebook task runs on serverless compute (no cluster block). Job + task tags
+# mirror the Ontos governance vocabulary so lineage/cost/search line up across
+# Ontos and Databricks.
+# =============================================================================
+resources:
+  jobs:
+    customer_360_synthetic_dataset:
+      name: "[${bundle.target}] Bricks&Co — Customer 360 synthetic dataset"
+      description: "Generates ${var.catalog}.${var.schema}.${var.table} with synthetic customers and applies Unity Catalog tags mirroring Ontos."
+
+      # Job-level tags (mirror the Ontos governance tags)
+      tags:
+        domain: customer
+        data-tier: gold
+        data-classification: restricted
+        pii: present
+        lifecycle-status: active
+        source: ontos
+        data_product: customer-360-profile
+
+      tasks:
+        - task_key: generate_customer_360
+          notebook_task:
+            notebook_path: ../src/generate_customer_360.py
+            base_parameters:
+              catalog: ${var.catalog}
+              schema: ${var.schema}
+              table: ${var.table}
+              num_rows: ${var.num_rows}
+          # No compute block => runs on serverless jobs compute.
+
+      queue:
+        enabled: true
+
+      email_notifications:
+        on_failure:
+          - ${var.notification_email}
+
+      permissions:
+        - level: CAN_VIEW
+          group_name: "users"
