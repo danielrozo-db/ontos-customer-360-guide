@@ -31,7 +31,7 @@ if [[ -z "$PRODUCT_ID" ]]; then
     kind: "DataProduct",
     id: "bricksco-customer-360-profile-dp-001",
     version: "1.0.0",
-    status: "draft",
+    status: "active",
     name: $name,
     tenant: $tenant,
     domain_ids: [$dom],

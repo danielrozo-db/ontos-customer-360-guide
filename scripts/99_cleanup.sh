@@ -3,8 +3,9 @@
 # 99_cleanup.sh — Delete everything the guide created (reverse dependency order)
 # =============================================================================
 # OPTIONAL teardown. Deletes product -> contract -> project -> team -> domain,
-# then the tags and namespace. Safe to run repeatedly; missing resources are
-# ignored. Run only if you want to leave the workspace clean.
+# then the Marketing team/domain created by 10_onboard.sh, then the tags and
+# namespace. Safe to run repeatedly; missing resources are ignored. Run only if
+# you want to leave the workspace clean.
 #
 #   CONFIRM=yes ./99_cleanup.sh
 # =============================================================================
@@ -31,6 +32,11 @@ echo "==> Deleting Customer 360 graph (reverse order)"
 [[ -n "${PROJECT_ID:-}"  ]] && del "/api/projects/$PROJECT_ID"        "project $PROJECT_ID"
 [[ -n "${TEAM_ID:-}"     ]] && del "/api/teams/$TEAM_ID"              "team $TEAM_ID"
 [[ -n "${DOMAIN_ID:-}"   ]] && del "/api/data-domains/$DOMAIN_ID"     "domain $DOMAIN_ID"
+
+echo "==> Deleting Marketing resources (from 10_onboard.sh)"
+# Team is bound to the Marketing domain, so delete the team before its domain.
+[[ -n "${MARKETING_TEAM_ID:-}"   ]] && del "/api/teams/$MARKETING_TEAM_ID"          "marketing team $MARKETING_TEAM_ID"
+[[ -n "${MARKETING_DOMAIN_ID:-}" ]] && del "/api/data-domains/$MARKETING_DOMAIN_ID" "marketing domain $MARKETING_DOMAIN_ID"
 
 echo "==> Deleting tags"
 for v in TAG_DOMAIN_ID TAG_TIER_ID TAG_CLASS_ID TAG_PII_ID TAG_LIFECYCLE_ID; do

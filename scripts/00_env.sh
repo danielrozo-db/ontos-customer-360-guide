@@ -90,6 +90,7 @@ _api() {
 }
 api_get()    { _api GET    "$1"; }
 api_post()   { _api POST   "$1" "$2"; }
+api_put()    { _api PUT    "$1" "$2"; }
 api_delete() { _api DELETE "$1"; }
 
 # --- State helpers -----------------------------------------------------------

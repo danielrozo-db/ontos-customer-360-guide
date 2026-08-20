@@ -31,7 +31,7 @@ if [[ -z "$CONTRACT_ID" ]]; then
   {
     name: $name,
     version: "1.0.0",
-    status: "draft",
+    status: "active",
     kind: "DataContract",
     apiVersion: "v3.1.0",
     owner_team_id: $team,

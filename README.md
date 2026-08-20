@@ -23,6 +23,66 @@ everything to reproduce the Bricks&Co Customer 360 story end to end:
 
 ## Part 1 — Build the Ontos graph (CURL)
 
+### Recommended: one-command onboarding (`10_onboard.sh`)
+
+The fastest way to stand up the whole graph is the onboarding orchestrator. It runs the
+entire guide (`01`..`07`) end to end in one shot and layers a small multi-team org
+structure on top, parameterized by three users:
+
+```bash
+cd scripts
+./10_onboard.sh \
+  --admin    you@company.com \
+  --producer producer@company.com \
+  --consumer consumer@company.com
+```
+
+All three flags are **required**:
+
+| Flag | Effect |
+|------|--------|
+| `--admin <email>` | Added as **Admin** to **both** the Customer Team and the Marketing team |
+| `--producer <email>` | Added to the **Customer Team** with role **Data Producer** |
+| `--consumer <email>` | Added to the **Marketing team** with role **Data Consumer** |
+
+**What it does, in order:**
+
+1. Runs `01_tags` → `07_tag_entities` (tags → Customer Core domain → Customer Team →
+   Customer 360 Project → ODCS contract → ODPS product → entity tagging). The auth token
+   is minted **once** and shared across all steps.
+2. Creates the **"Bricks&Co Marketing"** data domain.
+3. Creates the **"Bricks&Co Marketing"** team, bound to that domain.
+4. Assigns the three users to their roles (see table above).
+5. Promotes the **Customer 360 Project** to a `TEAM` project and assigns the Customer Team to it.
+6. **Removes all tags from the Customer Core domain.**
+
+The orchestrator is **idempotent** and safe to re-run. Because `01`..`07` recreate
+resources by name, it also doubles as the **rebuild path after `99_cleanup.sh`**.
+
+Override the Marketing names via environment variables if desired:
+```bash
+MARKETING_DOMAIN_NAME="Acme Marketing" MARKETING_TEAM_NAME="Acme Marketing" \
+  ./10_onboard.sh --admin ... --producer ... --consumer ...
+```
+
+`10_onboard.sh` does **not** run `08_verify.sh` or `09_upload_docs.sh` — run those as
+follow-ups (see below).
+
+### Follow-ups
+
+```bash
+./08_verify.sh        # read back and summarize the whole graph
+./09_upload_docs.sh   # attach the contract docs (Markdown + PDF from ../assets) to the data contract
+```
+
+`09_upload_docs.sh` requires `CONTRACT_ID` in `scripts/.ontos_state.env`, which onboarding
+produces (via `05_contract.sh`).
+
+### Manual / step-by-step (advanced)
+
+To run the base guide without the extra Marketing org structure, invoke the scripts
+individually:
+
 ```bash
 cd scripts
 ./01_tags.sh        # tag namespace + controlled vocabulary
@@ -43,10 +103,14 @@ Override any default via environment variables, e.g.:
 BASE_URL=https://ontos-xxxx.aws.databricksapps.com DATABRICKS_PROFILE=ontos ./01_tags.sh
 ```
 
+### Teardown
+
 Optional teardown (reverse order):
 ```bash
 CONFIRM=yes ./99_cleanup.sh
 ```
+
+Re-run `10_onboard.sh` afterward to rebuild everything.
 
 ## Part 2 — Materialize the dataset (Databricks Asset Bundle)
 
